@@ -1,7 +1,7 @@
 # ml-ssa-birthnames
 
 A journey into Python and Machine Learning with the birthname database of
-the Social Security Agency
+the US Social Security Agency
 
 **WORK IN PROGRESS!**
 
