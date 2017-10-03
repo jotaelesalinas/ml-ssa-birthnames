@@ -9,7 +9,7 @@ the Social Security Agency
 
 Not long ago, I stumbled upon a nice Tweet by
 [Martín Donato](https://twitter.com/martindonato/status/910019348953223169)
-in which an animated gif whowed a map of USA with the evolution of the most
+in which an animated gif showed a map of USA with the evolution of the most
 popular female names by state, from 1960 to 2016.
 
 ![Map showing the year 1960](https://pbs.twimg.com/tweet_video_thumb/DKEJxHIXkAA6Sj4.jpg)
