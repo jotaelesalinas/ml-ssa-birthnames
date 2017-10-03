@@ -59,8 +59,6 @@ class SsaSpider(Spider):
                 req.meta['year'] = year
                 req.meta['state'] = state
                 yield req
-                break
-            break
 
     def parse_country(self, response):
         if self._saver == None: raise Exception('Saver not set in SsaSpider.')
@@ -69,18 +67,24 @@ class SsaSpider(Spider):
         data = self.extract_country_data(response)
         year = response.meta['year']
         
-        print(year, len(data))
-        
         for item in data:
             item['year'] = year
             obj = CountryData(**item)
             self._saver.send(obj)
     
     def parse_state(self, response):
+        if self._saver == None: raise Exception('Saver not set in SsaSpider.')
+        
         # xxx check that response code is 200
         data = self.extract_state_data(response)
         year = response.meta['year']
         state = response.meta['state']
+        
+        for item in data:
+            item['year'] = year
+            item['state'] = state
+            obj = StateData(**item)
+            self._saver.send(obj)
     
     def extract_country_data(self, response):
         data = []
@@ -116,8 +120,39 @@ class SsaSpider(Spider):
         return data
     
     def extract_state_data(self, response):
-        self.log('extract_state_data()')
-        self.log(len(response.body))
+        data = []
+        
+        for caption in response.css('table > caption'):
+            caption_text = caption.css('::text').extract_first()
+            if not re.match(r'^Popularity for top 100 names in ', caption_text):
+                continue
+            
+            table = caption.xpath('..')
+            
+            n = 0
+            for tr in table.css('tr'):
+                n = n + 1
+                if n == 1: continue
+                
+                cells = tr.css('td ::text').extract()
+                if not re.match(r'^\d+$', cells[0]): continue
+                
+                data.append({
+                    "pos": cells[0],
+                    "name": cells[1],
+                    "gender": 'm',
+                    "count": cells[2].replace(',', ''),
+                })
+                data.append({
+                    "pos": cells[0],
+                    "name": cells[3],
+                    "gender": 'f',
+                    "count": cells[4].replace(',', ''),
+                })
+            
+            break
+        
+        return data
     
     def db_saver(self):
         # init db
@@ -127,6 +162,8 @@ class SsaSpider(Spider):
         metadata = MetaData(db)
         states = Table('state_level', metadata, autoload=True)
         country = Table('country_level', metadata, autoload=True)
+        
+        # xxx empty both tables
         
         statesmapper = mapper(StateData, states)
         countrymapper = mapper(CountryData, country)
