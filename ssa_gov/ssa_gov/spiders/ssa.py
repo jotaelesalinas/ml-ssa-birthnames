@@ -67,6 +67,8 @@ class SsaSpider(Spider):
         data = self.extract_country_data(response)
         year = response.meta['year']
         
+        print('Year:', year)
+        
         for item in data:
             item['year'] = year
             obj = CountryData(**item)
@@ -190,9 +192,7 @@ class SsaSpider(Spider):
             
             n += 1
             if n % 1000 == 0:
-                print('Flushing DB...')
                 session.flush()
-                print('New entity:', entity.__dict__)
             
             
         print('Flushing DB...')

@@ -14,7 +14,7 @@ BOT_NAME = 'ssa_gov'
 SPIDER_MODULES = ['ssa_gov.spiders']
 NEWSPIDER_MODULE = 'ssa_gov.spiders'
 
-#LOG_ENABLED = False
+LOG_ENABLED = False
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'ssa_gov (+http://www.yourdomain.com)'
