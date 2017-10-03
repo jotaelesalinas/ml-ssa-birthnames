@@ -12,8 +12,6 @@ Not long ago, I stumbled upon a nice Tweet by
 in which an animated gif showed a map of USA with the evolution of the most
 popular female names by state, from 1960 to 2016.
 
-![Map showing the year 1960](https://pbs.twimg.com/tweet_video_thumb/DKEJxHIXkAA6Sj4.jpg)
-
 <blockquote class="twitter-tweet" data-lang="es"><p lang="es" dir="ltr">El
 mapa gif del día, el nombre de mujer más popular en los distintos estados
 de USA por año.
