@@ -1,8 +1,29 @@
 import os
+import re
 import scrapy
+from scrapy import signals
+from scrapy import Spider
 from sqlalchemy import *
+from sqlalchemy.orm import *
 
-class SsaSpider(scrapy.Spider):
+class CountryData(object):
+    def __init__(self, year, pos, name, gender, count):
+        self.year = year
+        self.pos = pos
+        self.name = name
+        self.gender = gender
+        self.count = count
+
+class StateData(object):
+    def __init__(self, year, state, pos, name, gender, count):
+        self.year = year
+        self.state = state
+        self.pos = pos
+        self.name = name
+        self.gender = gender
+        self.count = count
+
+class SsaSpider(Spider):
     name = "ssa"
     
     # these values can be extracted from the website itself,
@@ -14,21 +35,18 @@ class SsaSpider(scrapy.Spider):
     _url_year_country = 'https://www.ssa.gov/cgi-bin/popularnames.cgi'
     _url_year_state = 'https://www.ssa.gov/cgi-bin/namesbystate.cgi'
     
-    # xxx
-    _db_path = 'sqlite:///joindemo.db' 'sqlite:///%(here)s/data/ssa_gov.sqlite'
+    _db_path = os.path.abspath(os.path.dirname(__file__) + '/../../../data/ssa_gov.sqlite').replace('\\', '/')
     
-    class CountryData(object):
-        pass
+    _saver = None
     
-    class StateData(object):
-        pass
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(SsaSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
     
     def start_requests(self):
-        #self.log('================================================================')
-        #self.log(__file__)
-        #self.log(os.path.abspath(__file__))
-        #self.log('================================================================')
-        
         for year in range(self._year_init, self._year_end + 1):
             post_data = {"year": str(year), "top": '1000', "number": 'n'}
             req = scrapy.http.FormRequest(self._url_year_country, formdata=post_data, callback=self.parse_country)
@@ -45,38 +63,80 @@ class SsaSpider(scrapy.Spider):
             break
 
     def parse_country(self, response):
+        if self._saver == None: raise Exception('Saver not set in SsaSpider.')
+        
         # xxx check that response code is 200
-        data = self.extract_country_data(response.body)
+        data = self.extract_country_data(response)
         year = response.meta['year']
+        
+        print(year, len(data))
+        
+        for item in data:
+            item['year'] = year
+            obj = CountryData(**item)
+            self._saver.send(obj)
     
     def parse_state(self, response):
         # xxx check that response code is 200
-        data = self.extract_state_data(response.body)
+        data = self.extract_state_data(response)
         year = response.meta['year']
         state = response.meta['state']
     
-    def extract_country_data(self, html):
-        self.log('extract_country_data()')
-        self.log(len(html))
+    def extract_country_data(self, response):
+        data = []
+        
+        for table in response.css('table'):
+            summary = table.xpath('@summary').extract()
+            if len(summary) == 0: continue
+            elif summary[0] != 'Popularity for top 1000': continue
+            
+            n = 0
+            for tr in table.css('tr'):
+                n = n + 1
+                if n == 1: continue
+                
+                cells = tr.css('td ::text').extract()
+                if not re.match(r'^\d+$', cells[0]): continue
+                
+                data.append({
+                    "pos": cells[0],
+                    "name": cells[1],
+                    "gender": 'm',
+                    "count": cells[2].replace(',', ''),
+                })
+                data.append({
+                    "pos": cells[0],
+                    "name": cells[3],
+                    "gender": 'f',
+                    "count": cells[4].replace(',', ''),
+                })
+            
+            break
+        
+        return data
     
-    def extract_state_data(self, html):
+    def extract_state_data(self, response):
         self.log('extract_state_data()')
-        self.log(len(html))
+        self.log(len(response.body))
     
     def db_saver(self):
-        """Generator"""
         # init db
-        db = create_engine(self._db_path)
-        db.echo = True
-        metadata = BoundMetaData(db)
+        print('Opening DB...')
+        db = create_engine('sqlite:///' + self._db_path)
+        db.echo = False
+        metadata = MetaData(db)
         states = Table('state_level', metadata, autoload=True)
         country = Table('country_level', metadata, autoload=True)
         
         statesmapper = mapper(StateData, states)
         countrymapper = mapper(CountryData, country)
         
-        session = create_session()
+        # Set up the session
+        sm = sessionmaker(bind=db, autoflush=False, autocommit=False,
+            expire_on_commit=True)
+        session = scoped_session(sm)
         
+        n = 0
         while True:
             # read from yield
             entity = yield
@@ -89,7 +149,30 @@ class SsaSpider(scrapy.Spider):
             else:
                 raise "Wrong entity type"
             
-            session.save(entity)
+            session.add(entity)
             
-        # close db
+            n += 1
+            if n % 1000 == 0:
+                print('Flushing DB...')
+                session.flush()
+                print('New entity:', entity.__dict__)
+            
+            
+        print('Flushing DB...')
         session.flush()
+        session.commit()
+        print('DB flushed and commited.')
+    
+    def spider_opened(self, spider):
+        # second param is instance of spder about to be closed.
+        print('Starting saver...')
+        self._saver = self.db_saver()
+        self._saver.send(None)
+    
+    def spider_closed(self, spider):
+        # second param is instance of spder about to be closed.
+        print('Finishing saver...')
+        try:
+            self._saver.send(None)
+        except StopIteration:
+            pass

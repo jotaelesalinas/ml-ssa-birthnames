@@ -9,11 +9,12 @@ __depends__ = {}
 step(
     "CREATE TABLE country_level ("
         "year INT NOT NULL,"
-        "name VARCHAR(20) NOT NULL,"
+        "name VARCHAR(32) NOT NULL,"
         "gender CHAR(1) NOT NULL,"
         "pos INT NOT NULL,"
         "count INT DEFAULT NULL,"
-        "perc DOUBLE DEFAULT NULL"
+        "perc DOUBLE DEFAULT NULL,"
+        "PRIMARY KEY (year, name, gender)"
     ")",
     "DROP TABLE IF EXISTS country_level",
 )

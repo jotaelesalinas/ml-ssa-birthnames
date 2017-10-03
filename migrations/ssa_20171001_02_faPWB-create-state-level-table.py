@@ -10,11 +10,12 @@ step(
     "CREATE TABLE state_level ("
         "year INT NOT NULL,"
         "state CHAR(2) NOT NULL,"
-        "name VARCHAR(20) NOT NULL,"
+        "name VARCHAR(32) NOT NULL,"
         "gender CHAR(1) NOT NULL,"
         "pos INT NOT NULL,"
         "count INT DEFAULT NULL,"
-        "perc DOUBLE DEFAULT NULL"
+        "perc DOUBLE DEFAULT NULL,"
+        "PRIMARY KEY (year, state, name, gender)"
     ")",
     "DROP TABLE IF EXISTS state_level",
 )
