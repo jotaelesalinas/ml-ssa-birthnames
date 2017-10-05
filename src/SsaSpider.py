@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 import scrapy
 from scrapy import signals
 from scrapy import Spider
@@ -23,8 +24,10 @@ class StateData(object):
         self.gender = gender
         self.count = count
 
+logging.getLogger('scrapy').setLevel(logging.WARNING)
+
 class SsaSpider(Spider):
-    name = "ssa"
+    name = "SsaSpider"
     
     # these values can be extracted from the website itself,
     # so they are always up to date
@@ -35,7 +38,7 @@ class SsaSpider(Spider):
     _url_year_country = 'https://www.ssa.gov/cgi-bin/popularnames.cgi'
     _url_year_state = 'https://www.ssa.gov/cgi-bin/namesbystate.cgi'
     
-    _db_path = os.path.abspath(os.path.dirname(__file__) + '/../../../data/ssa_gov.sqlite').replace('\\', '/')
+    _db_path = None
     
     _saver = None
     
@@ -159,6 +162,9 @@ class SsaSpider(Spider):
     def db_saver(self):
         # init db
         print('Opening DB...')
+        self._db_path = self.find_db_file()
+        if self._db_path == None: raise Exception('Database file not found in data/ssa_gov.sqlite.')
+        
         db = create_engine('sqlite:///' + self._db_path)
         db.echo = False
         metadata = MetaData(db)
@@ -174,6 +180,12 @@ class SsaSpider(Spider):
         sm = sessionmaker(bind=db, autoflush=False, autocommit=False,
             expire_on_commit=True)
         session = scoped_session(sm)
+        
+        print('Emptying tables...')
+        session.execute('DELETE FROM state_level')
+        session.execute('DELETE FROM country_level')
+        session.flush()
+        session.commit()
         
         n = 0
         while True:
@@ -199,6 +211,19 @@ class SsaSpider(Spider):
         session.flush()
         session.commit()
         print('DB flushed and commited.')
+    
+    def find_db_file(self):
+        dir = os.path.dirname(__file__) + '/'
+        file = 'data/ssa_gov.sqlite'
+        
+        n = 1
+        while not os.path.exists(dir + file):
+            n += 1
+            if n > 5:
+                return None
+            dir = dir + '../'
+        
+        return os.path.abspath(dir + file).replace('\\', '/')
     
     def spider_opened(self, spider):
         # second param is instance of spder about to be closed.
