@@ -48,6 +48,7 @@ The plan I initially came up with was:
 
 	* (Book) [Discovering knowledge in data: an introduction to data mining](http://eu.wiley.com/WileyCDA/WileyTitle/productCd-0470908742.html)
 	* (Book) [Data mining and predictive analytics](http://eu.wiley.com/WileyCDA/WileyTitle/productCd-1118116194.html)
+    * (Basic theory) https://medium.com/towards-data-science/the-7-steps-of-machine-learning-2877d7e5548e
 	* (Online tutorial) [Practical machine learning tutorial with Python introduction](https://pythonprogramming.net/machine-learning-tutorial-python-introduction/)
 	* (Online tutorial) [TensorFlow tutorial for beginners](https://www.datacamp.com/community/tutorials/tensorflow-tutorial#gs.es_61Bs)
 	* (Online tutorial) [Large-scale Linear Models with TensorFlow](https://www.tensorflow.org/tutorials/linear)
@@ -76,9 +77,7 @@ What about detecting the early adopters and the followers? No idea.
 6. Machine learning. I think I will go for Google's
 [TensorFlow](https://www.tensorflow.org/get_started/get_started).
 
-https://medium.com/towards-data-science/the-7-steps-of-machine-learning-2877d7e5548e
-
-## Downloading the data
+## Gathering the data
 
 After navigating SSA's website for a while, I decided that two datasets were
 of interest:
@@ -94,7 +93,7 @@ Other datasets that I deemed not of interest were:
 - [Popular names by territory](https://www.ssa.gov/OACT/babynames/territories.html)
 - [Popular baby names by decade](https://www.ssa.gov/OACT/babynames/decades/index.html)
 
-### Web scraping
+### Downloading the data (web scraping)
 
 _Note: I have not found a way to download the data directly in a nice format
 like CSV, JSON or the like. There is a huge dataset at
@@ -113,32 +112,47 @@ installed. No, no, no.
 
 I hadn't even started coding and I was already missing PHP and Composer :(
 
-Instead of fighting with Visual C++ or resorting to `requests`, I opted for
+Instead of fighting with Visual C++, I opted for
 installing [Anaconda](https://www.anaconda.com/what-is-anaconda/),
 an all-batteries-included Python package. I followed the instructions in
 [Install Python on Windows](https://medium.com/@GalarnykMichael/install-python-on-windows-anaconda-c63c7c3d1444),
 choosing the latest version 3.6.
 
+To build the scraper I used `scrapy`. To store the data locally i used
+`sqlite3` (included by default with Python) as lightweight database,
+`yoyo-migrations` to create the table schemas and `sqlalchemy` as ORM.
+
 ```bash
 conda install scrapy sqlalchemy
 pip install yoyo-migrations
 
-scrapy startproject ssa_gov
-cd ssa_gov
-scrapy genspider ssa ssa.gov
-cd ..
-
 yoyo new -m "Create state level table"
 
 yoyo.ini
+src/SsaScraper.py
 ```
 
+You can see the code of the scraper in [src/SsaScraper.py](src/SsaScraper.py).
 
-So I had to look at the source code and decided to create a script to send
-an HTTP POST request for each year/state combination and also
+## Understanding the data
 
+How much data do we have? (As of 2017, with data from 1960 to 2016.)
 
-When trying to install scrapy, I get an "Error building wheels for twisted." I don't know what a wheel is in this context.
-I haven't even started coding and I already miss PHP and Composer :(
+2 genres * 57 years * ((1 country * 1000 names/country) + (51 states * 100 names/state)) = 695,400 genre-name-year combinations
 
-Anaconda? [Install Python on Windows (Anaconda)](https://medium.com/@GalarnykMichael/install-python-on-windows-anaconda-c63c7c3d1444)
+For each genre-name-year, we have two values: 
+
+- position, from 1 to 1000 or 1 to 100
+- number of births
+
+Add delta with same gender-name of previous year? No... or yes?
+
+Mix genders? No.
+
+Use everything? No. For each genre-name-year, take into account data of previous x years. 2? 5? 10?
+
+Groups of 2 years: 56. Of 5 years: 53. Of 10 years: 48. Not a huge dataset for training.
+
+Normalize? Yes.
+
+## Preparing the data
