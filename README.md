@@ -136,6 +136,8 @@ You can see the code of the scraper in [src/SsaSpider.py](src/SsaSpider.py).
 
 ## Understanding the data
 
+Number of unique names? Names appearing most times?
+
 How much data do we have? (As of 2017, with data from 1960 to 2016.)
 
 2 genres * 57 years * ((1 country * 1000 names/country) + (51 states * 100 names/state)) = 695,400 genre-name-year combinations
