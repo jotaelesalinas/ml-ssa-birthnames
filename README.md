@@ -48,7 +48,7 @@ The plan I initially came up with was:
 
 	* (Book) [Discovering knowledge in data: an introduction to data mining](http://eu.wiley.com/WileyCDA/WileyTitle/productCd-0470908742.html)
 	* (Book) [Data mining and predictive analytics](http://eu.wiley.com/WileyCDA/WileyTitle/productCd-1118116194.html)
-    * (Basic theory) https://medium.com/towards-data-science/the-7-steps-of-machine-learning-2877d7e5548e
+    * (Basic theory) [7 steps of machine learning](https://medium.com/towards-data-science/the-7-steps-of-machine-learning-2877d7e5548e)
 	* (Online tutorial) [Practical machine learning tutorial with Python introduction](https://pythonprogramming.net/machine-learning-tutorial-python-introduction/)
 	* (Online tutorial) [TensorFlow tutorial for beginners](https://www.datacamp.com/community/tutorials/tensorflow-tutorial#gs.es_61Bs)
 	* (Online tutorial) [Large-scale Linear Models with TensorFlow](https://www.tensorflow.org/tutorials/linear)
@@ -120,16 +120,15 @@ choosing the latest version 3.6.
 
 To build the scraper I used `scrapy`. To store the data locally I used
 `sqlite3` (included by default with Python) as lightweight database,
-`yoyo-migrations` to create the table schemas and `sqlalchemy` as ORM.
+`yoyo-migrations` to manage [migrations](https://en.wikipedia.org/wiki/Schema_migration)
+and `sqlalchemy` as [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping).
 
 ```bash
 conda install scrapy sqlalchemy
 pip install yoyo-migrations
 
-yoyo new -m "Create state level table"
-
-yoyo.ini
-src/SsaScraper.py
+yoyo apply
+scrapy runspider src/SsaScraper.py
 ```
 
 You can see the code of the scraper in [src/SsaSpider.py](src/SsaSpider.py).
