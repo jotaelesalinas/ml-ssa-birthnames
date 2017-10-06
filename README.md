@@ -118,7 +118,7 @@ an all-batteries-included Python package. I followed the instructions in
 [Install Python on Windows](https://medium.com/@GalarnykMichael/install-python-on-windows-anaconda-c63c7c3d1444),
 choosing the latest version 3.6.
 
-To build the scraper I used `scrapy`. To store the data locally i used
+To build the scraper I used `scrapy`. To store the data locally I used
 `sqlite3` (included by default with Python) as lightweight database,
 `yoyo-migrations` to create the table schemas and `sqlalchemy` as ORM.
 
@@ -132,7 +132,7 @@ yoyo.ini
 src/SsaScraper.py
 ```
 
-You can see the code of the scraper in [src/SsaScraper.py](src/SsaScraper.py).
+You can see the code of the scraper in [src/SsaSpider.py](src/SsaSpider.py).
 
 ## Understanding the data
 
