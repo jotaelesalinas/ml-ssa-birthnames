@@ -146,6 +146,19 @@ For each genre-name-year, we have two values:
 - position, from 1 to 1000 or 1 to 100
 - number of births
 
+|Pos.|Gender|Name|Years|Gender|Name|Years|
+|---:|---|---|---:|---|---|---:|
+|1|f|Elizabeth|57|m|Daniel|57|
+|2|f|Sarah|51|m|Joseph|57|
+|3|f|Katherine|50|m|Michael|57|
+|4|f|Mary|48|m|William|57|
+|5|f|Anna|46|m|Andrew|56|
+|6|f|Jennifer|46|m|Anthony|56|
+|7|f|Rebecca|46|m|Christopher|56|
+|8|f|Kimberly|45|m|David|56|
+|9|f|Emily|43|m|James|56|
+|10|f|Stephanie|43|m|John|56|
+
 Add delta with same gender-name of previous year? No... or yes?
 
 Mix genders? No.
