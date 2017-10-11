@@ -7,7 +7,7 @@ from yoyo import step
 __depends__ = {}
 
 step(
-    "CREATE TABLE state_level ("
+    "CREATE TABLE IF NOT EXISTS state_level ("
         "year INT NOT NULL,"
         "state CHAR(2) NOT NULL,"
         "name VARCHAR(32) NOT NULL,"
@@ -20,18 +20,18 @@ step(
     "DROP TABLE IF EXISTS state_level",
 )
 step(
-    "CREATE INDEX idx_state_year ON state_level (year)",
+    "CREATE INDEX IF NOT EXISTS idx_state_year ON state_level (year)",
     "DROP INDEX IF EXISTS idx_state_year",
 )
 step(
-    "CREATE INDEX idx_state_state ON state_level (state)",
+    "CREATE INDEX IF NOT EXISTS idx_state_state ON state_level (state)",
     "DROP INDEX IF EXISTS idx_state_state",
 )
 step(
-    "CREATE INDEX idx_state_name ON state_level (name)",
+    "CREATE INDEX IF NOT EXISTS idx_state_name ON state_level (name)",
     "DROP INDEX IF EXISTS idx_state_name",
 )
 step(
-    "CREATE INDEX idx_state_gender ON state_level (gender)",
+    "CREATE INDEX IF NOT EXISTS idx_state_gender ON state_level (gender)",
     "DROP INDEX IF EXISTS idx_state_gender",
 )

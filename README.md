@@ -146,6 +146,8 @@ For each genre-name-year, we have two values:
 - position, from 1 to 1000 or 1 to 100
 - number of births
 
+Which names appear more years?
+
 |Pos.|Gender|Name|Years|Gender|Name|Years|
 |---:|---|---|---:|---|---|---:|
 |1|f|Elizabeth|57|m|Daniel|57|
