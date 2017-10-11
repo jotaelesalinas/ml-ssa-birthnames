@@ -103,6 +103,8 @@ class CsvGenerator:
             csvwriter.writerow(['Name_Year'] + headers)
             
             for year in self._data['f']:
+                # xxx skip first and last n years (5)
+                
                 for name in self._data['f'][year]:
                     row = []
                     row.append(name + '_' + str(year))
@@ -123,6 +125,8 @@ class CsvGenerator:
             csvwriter.writerow(['Name_Year'] + headers)
             
             for year in self._data['m']:
+                # xxx skip first and last n years (5)
+                
                 for name in self._data['m'][year]:
                     row = []
                     row.append(name + '_' + str(year))
